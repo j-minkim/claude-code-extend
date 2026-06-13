@@ -1584,37 +1584,38 @@ claude mcp add context7 -- npx -y @upstash/context7-mcp</div>
   </div>
 
   <div class="slide" data-title="API를 코드로도 호출" data-chapter="API 키 · 보강">
-    <div class="slide-label"><i data-lucide="terminal"></i> 보강 · 코드로 직접 (전원 락스텝)</div>
-    <h1>같은 키를, <span class="hl">코드로도</span> 직접 써봐요</h1>
+    <div class="slide-label"><i data-lucide="terminal"></i> 보강 · 코드로 직접 (강사 시연)</div>
+    <h1>코드로 <span class="hl">GPT(OpenAI)</span>를 직접 불러봐요</h1>
 
     <div style="margin:6px 0 4px; padding:9px 13px; background:rgba(79,140,255,0.07); border:1px solid rgba(79,140,255,0.28); border-radius:10px; font-size:13.5px; line-height:1.55;">
-      🧩 <b>API 호출</b> = 정해진 <b>주소(URL)로 HTTP 요청 → JSON 응답</b>을 받는 것. <b>API 키</b>는 <code>Authorization</code> 헤더에 넣는 <b>출입증</b>. (설치 0 — Node 22 내장 <code>fetch</code>)
+      🧩 <b>AI 모델도 결국 API</b>예요 — 정해진 <b>주소(URL)로 요청 → JSON 응답</b>. <b>키</b>는 <code>Authorization</code> 헤더에 넣는 <b>출입증</b>(MCP·GitHub 때와 원리 동일). 설치 0 — Node 22 내장 <code>fetch</code>.
     </div>
 
-    <div class="code-block pre"><span class="comment">// 1) 키 없이 — 공개 정보 (누구나)</span>
-fetch(<span class="s">"https://api.github.com/users/octocat"</span>)
-
-<span class="comment">// 2) 키 넣고 — '나'로 인증 (딱 한 줄 추가!)</span>
-fetch(<span class="s">"https://api.github.com/user"</span>, {
-  <span class="k">headers</span>: { <span class="k">Authorization</span>: <span class="s">"Bearer "</span> + 토큰 }   <span class="comment">// ← 익명 → 나</span>
-})</div>
+    <div class="code-block pre"><span class="comment">// OpenAI에 "한 줄 답해줘" — POST 요청</span>
+fetch(<span class="s">"https://api.openai.com/v1/chat/completions"</span>, {
+  <span class="k">method</span>: <span class="s">"POST"</span>,
+  <span class="k">headers</span>: { <span class="k">Authorization</span>: <span class="s">"Bearer "</span> + 키,   <span class="comment">// ← 출입증(.env에!)</span>
+            <span class="s">"Content-Type"</span>: <span class="s">"application/json"</span> },
+  <span class="k">body</span>: JSON.stringify({ <span class="k">model</span>: <span class="s">"gpt-4o-mini"</span>,
+    <span class="k">messages</span>: [{ <span class="k">role</span>: <span class="s">"user"</span>, <span class="k">content</span>: <span class="s">"한 줄 자기소개 해줘"</span> }] })
+})  <span class="comment">// 답 → data.choices[0].message.content</span></div>
 
     <div class="grid-2" style="margin-top:6px;">
-      <div class="card highlight">
-        <div class="card-title"><i data-lucide="play" style="width:16px"></i> 락스텝 (실습 자료/API 코드 실습/)</div>
-        <div class="card-body"><code>node 1-공개호출.mjs</code>(공개) → <code>cp .env.example .env</code>에 토큰 → <code>node --env-file-if-exists=.env 2-내계정호출.mjs</code>(내 계정·내 레포).</div>
+      <div class="card warn-card">
+        <div class="card-title"><i data-lucide="user-cog" style="width:16px"></i> 강사 시연 (유료 키)</div>
+        <div class="card-body"><code>node --env-file-if-exists=.env 3-openai-강사시연.mjs "질문"</code>. OpenAI는 <b>유료(소액)</b>라 전원 실습 X — 강사가 본인 키로. 키는 <code>platform.openai.com</code>에서 발급(크레딧 필요).</div>
       </div>
       <div class="card">
         <div class="card-title"><i data-lucide="git-compare-arrows" style="width:16px"></i> MCP vs 코드</div>
-        <div class="card-body"><b>MCP</b>=Claude가 호출(채팅) · <b>코드</b>=내 앱이 호출(스크립트). <strong>같은 API·같은 키·같은 원리.</strong></div>
+        <div class="card-body"><b>MCP</b>=Claude가 호출(채팅) · <b>코드</b>=내 앱이 호출(스크립트). <strong>같은 원리 — 주소 + Authorization 키 + JSON.</strong></div>
       </div>
     </div>
 
-    <div class="success-box" style="margin-top:10px;">
-      <i data-lucide="wand-2"></i>
-      <p>직접 안 짜도 OK — <b>"내 열린 이슈도 보여줘"</b>, <b>"별 많은 순 top3"</b>처럼 Claude에게 코드 수정을 시키고 다시 실행하면 됩니다.</p>
+    <div class="warn-box" style="margin-top:10px;">
+      <i data-lucide="shield-alert"></i>
+      <p>이 키도 <b>비밀번호급</b> — <code>.env</code>에 두고 <b>절대 코드/깃에 박지 말 것</b>(앞 "키 유출 사고" 그대로). 노출되면 <b>요금 폭탄</b>까지 나옵니다.</p>
     </div>
-    <aside class="kit-notes" hidden>MCP로 붙였던 그 GitHub PAT를 이번엔 코드에서 직접 씁니다. 핵심 메시지는 딱 하나 — 1단계(키 없이 공개)와 2단계(키 넣고 나) 코드가 거의 같고, <code>Authorization: Bearer 토큰</code> 한 줄이 "익명 → 나"로 바꿔준다. 그게 API 키의 정체예요. 설치는 0(Node 22 내장 fetch + --env-file-if-exists). 학생은 코드를 외울 필요 없이 Claude에게 "이렇게 바꿔줘"로 변형하면 됩니다. 키는 .env에 두고 git 금지·노출 시 재발급을 한 번 더 강조. 자세한 절차는 실습 자료/API 코드 실습/README.md.</aside>
+    <aside class="kit-notes" hidden>이건 강사 시연이에요(OpenAI는 유료라 전원 실습 X). 핵심 메시지: "여러분이 채팅으로 쓰던 GPT를, 코드로도 똑같이 부를 수 있다 — 결국 API다." 코드 골격은 GitHub 예제와 같고(주소 + Authorization 헤더 + JSON), 다른 건 '어떤 서비스의 주소·본문이냐'뿐이라는 걸 짚으세요. 응답은 data.choices[0].message.content. 키는 .env에 두고 절대 커밋 금지 — 특히 유료 키라 노출되면 요금 폭탄(앞 '키 유출 사고' 슬라이드와 연결). vibe 변형 예: "온도 0.7로 바꿔줘", "영어로 번역하는 버전". (무료로 학생도 코드를 직접 해보고 싶으면 실습 자료/API 코드 실습/의 GitHub 무료 버전 1·2번 파일을 부록으로 쓸 수 있음.) 키 발급·크레딧은 강의 전 확인.</aside>
   </div>
 
   <div class="slide" data-title="종합 시험" data-chapter="마무리 · 5분">
