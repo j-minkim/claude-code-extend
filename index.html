@@ -1537,6 +1537,33 @@ claude mcp add context7 -- npx -y @upstash/context7-mcp</div>
     <aside class="kit-notes" hidden>키는 비밀번호와 같다는 한 문장이 핵심이에요. 발급은 보통 한 번만 보여주니 바로 복사, 보관은 코드에 박지 말고 <code>.env</code>·환경변수, 공유 시 <code>.gitignore</code>로 제외하고 MCP는 <code>${ENV}</code>로 참조한다는 흐름을 강조하세요. 노출되면 즉시 폐기(revoke)하고 재발급이면 끝이라는 점도 안심시켜 주세요.</aside>
   </div>
 
+  <div class="slide" data-title="키 유출 사고 — 통째로 올리면" data-chapter="API 키 · 보강">
+    <div class="slide-label"><i data-lucide="shield-alert"></i> 보강 · 왜 .env가 중요한가 (실화)</div>
+    <h1>키를 <span class="hl2">코드에 통째로</span> 올리면 생기는 일</h1>
+
+    <div class="stat-row" style="margin-top:14px;">
+      <div class="stat-card"><div class="label">2025년 공개 GitHub에 노출된 키</div><div class="value danger">2,865만 개</div><div class="sub">전년比 +34% · 역대 최대 (GitGuardian)</div></div>
+      <div class="stat-card"><div class="label">유출된 키가 2년 뒤에도 살아있는 비율</div><div class="value warn">≈ 70%</div><div class="sub">지운다고 끝 아님 — 이미 복사됨</div></div>
+      <div class="stat-card"><div class="label">Claude Code가 co-author한 커밋의 키 유출률</div><div class="value danger">약 2배</div><div class="sub">AI로 빨리 짤수록 더 조심</div></div>
+    </div>
+
+    <div class="warn-box" style="margin-top:14px;">
+      <i data-lucide="bot"></i>
+      <p><b>올라간 키는 봇이 수 분 내 스캔</b>해서 악용해요. 대표 사례: <b>AWS 키 유출 → 자동으로 서버를 띄워 암호화폐 채굴 → 몇 시간 만에 수천 달러 청구</b>. (GitHub이 secret scanning·push protection으로 막아주지만, 막히기 전에 털리면 끝.)</p>
+    </div>
+
+    <ul class="checklist" style="margin-top:8px;">
+      <li><span class="step-num">1</span><div>코드에 직접 X → <code>.env</code>·환경변수에 두고 <code>process.env</code>로 읽기</div></li>
+      <li><span class="step-num">2</span><div><code>.env</code>는 <code>.gitignore</code>에 — <b>절대 커밋 금지</b> (공개 repo면 GitHub가 자동 차단도)</div></li>
+      <li><span class="step-num">3</span><div>노출되면 <b>즉시 폐기(revoke)·재발급</b> — "지우면 되겠지"는 X</div></li>
+    </ul>
+
+    <div style="margin-top:8px; padding:9px 13px; background:rgba(245,158,66,0.08); border:1px solid rgba(245,158,66,0.3); border-radius:10px; font-size:13.5px;">
+      🧩 AI로 빨리 짤수록 키를 <b>무심코 코드에 박기</b> 쉬워요(그래서 통계도 2배). <b><code>.env</code> 습관</b>이 그래서 더 중요합니다.
+    </div>
+    <aside class="kit-notes" hidden>여기서 "키 = 비밀번호"를 숫자로 못 박으세요. 2025년 한 해 공개 GitHub에 2,865만 개의 키가 그대로 노출됐고(+34%, 역대 최대), 유출된 키의 약 70%는 2년 뒤에도 유효합니다 — 즉 "지우면 되겠지"가 안 통합니다(이미 봇이 복사). 특히 Claude Code로 co-author한 커밋은 키 유출률이 약 2배라는 통계가 있어요 — AI로 빨리 짤수록 무심코 키를 박기 쉽다는 뜻이라, .env 습관을 더 강조하기 좋은 포인트입니다. 대표 악용 사례는 AWS 키 유출→자동 암호화폐 채굴→몇 시간 만에 수천 달러 청구. 마무리는 세 줄 규칙(.env·gitignore·노출 시 즉시 재발급). 출처: GitGuardian State of Secrets Sprawl 2026. ⚠️ 당일 재확인 권장(수치 갱신될 수 있음).</aside>
+  </div>
+
   <div class="slide" data-title="실제 예시: GitHub" data-chapter="API 키 · 보강">
     <div class="slide-label"><i data-lucide="github"></i> 실제 예시 · 조금 어려우면 강사 시연</div>
     <h1>GitHub 키로 <span class="hl">내 저장소를 Claude가</span> 본다</h1>
@@ -1554,6 +1581,40 @@ claude mcp add context7 -- npx -y @upstash/context7-mcp</div>
       <p>이 단계는 조금 어려워요 — <b>앞 2장(개념·발급 원리)만 잡고</b>, GitHub 연결은 강사 시연으로 봐도 충분합니다. <code>.mcp.json</code>이면 토큰 대신 <code>"Authorization":"Bearer ${GITHUB_PAT}"</code> + 환경변수로.</p>
     </div>
     <aside class="kit-notes" hidden>API 키 + MCP를 합친 실제 예시예요. GitHub PAT를 발급해 MCP에 연결하면 "내 repo의 열린 이슈 정리"를 Claude가 해줍니다. 이 단계는 조금 어려우니, 앞의 개념·발급 원리만 확실히 잡고 GitHub 연결은 강사 시연으로 봐도 충분하다고 부담을 덜어주세요. <code>.mcp.json</code>이면 토큰 대신 <code>${GITHUB_PAT}</code> 환경변수 참조를 권합니다.</aside>
+  </div>
+
+  <div class="slide" data-title="API를 코드로도 호출" data-chapter="API 키 · 보강">
+    <div class="slide-label"><i data-lucide="terminal"></i> 보강 · 코드로 직접 (전원 락스텝)</div>
+    <h1>같은 키를, <span class="hl">코드로도</span> 직접 써봐요</h1>
+
+    <div style="margin:6px 0 4px; padding:9px 13px; background:rgba(79,140,255,0.07); border:1px solid rgba(79,140,255,0.28); border-radius:10px; font-size:13.5px; line-height:1.55;">
+      🧩 <b>API 호출</b> = 정해진 <b>주소(URL)로 HTTP 요청 → JSON 응답</b>을 받는 것. <b>API 키</b>는 <code>Authorization</code> 헤더에 넣는 <b>출입증</b>. (설치 0 — Node 22 내장 <code>fetch</code>)
+    </div>
+
+    <div class="code-block pre"><span class="comment">// 1) 키 없이 — 공개 정보 (누구나)</span>
+fetch(<span class="s">"https://api.github.com/users/octocat"</span>)
+
+<span class="comment">// 2) 키 넣고 — '나'로 인증 (딱 한 줄 추가!)</span>
+fetch(<span class="s">"https://api.github.com/user"</span>, {
+  <span class="k">headers</span>: { <span class="k">Authorization</span>: <span class="s">"Bearer "</span> + 토큰 }   <span class="comment">// ← 익명 → 나</span>
+})</div>
+
+    <div class="grid-2" style="margin-top:6px;">
+      <div class="card highlight">
+        <div class="card-title"><i data-lucide="play" style="width:16px"></i> 락스텝 (실습 자료/API 코드 실습/)</div>
+        <div class="card-body"><code>node 1-공개호출.mjs</code>(공개) → <code>cp .env.example .env</code>에 토큰 → <code>node --env-file-if-exists=.env 2-내계정호출.mjs</code>(내 계정·내 레포).</div>
+      </div>
+      <div class="card">
+        <div class="card-title"><i data-lucide="git-compare-arrows" style="width:16px"></i> MCP vs 코드</div>
+        <div class="card-body"><b>MCP</b>=Claude가 호출(채팅) · <b>코드</b>=내 앱이 호출(스크립트). <strong>같은 API·같은 키·같은 원리.</strong></div>
+      </div>
+    </div>
+
+    <div class="success-box" style="margin-top:10px;">
+      <i data-lucide="wand-2"></i>
+      <p>직접 안 짜도 OK — <b>"내 열린 이슈도 보여줘"</b>, <b>"별 많은 순 top3"</b>처럼 Claude에게 코드 수정을 시키고 다시 실행하면 됩니다.</p>
+    </div>
+    <aside class="kit-notes" hidden>MCP로 붙였던 그 GitHub PAT를 이번엔 코드에서 직접 씁니다. 핵심 메시지는 딱 하나 — 1단계(키 없이 공개)와 2단계(키 넣고 나) 코드가 거의 같고, <code>Authorization: Bearer 토큰</code> 한 줄이 "익명 → 나"로 바꿔준다. 그게 API 키의 정체예요. 설치는 0(Node 22 내장 fetch + --env-file-if-exists). 학생은 코드를 외울 필요 없이 Claude에게 "이렇게 바꿔줘"로 변형하면 됩니다. 키는 .env에 두고 git 금지·노출 시 재발급을 한 번 더 강조. 자세한 절차는 실습 자료/API 코드 실습/README.md.</aside>
   </div>
 
   <div class="slide" data-title="종합 시험" data-chapter="마무리 · 5분">
